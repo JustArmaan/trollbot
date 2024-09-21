@@ -1,0 +1,12 @@
+# Node modules
+/node_modules
+
+# Environment variables
+.env
+.env*.local
+/.env
+.env*
+
+# Config files
+.config.json
+./config.json
