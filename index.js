@@ -36,6 +36,27 @@ const commands = [
   new SlashCommandBuilder()
     .setName("destroy")
     .setDescription("Destroy everything!"),
+  new SlashCommandBuilder()
+    .setName("mock")
+    .setDescription("Mock your last message in alternating case!"),
+  new SlashCommandBuilder()
+    .setName("insult")
+    .setDescription("Insult someone!")
+    .addUserOption((option) =>
+      option
+        .setName("target")
+        .setDescription("The user to insult")
+        .setRequired(true)
+    ),
+  new SlashCommandBuilder()
+    .setName("8ball")
+    .setDescription("Ask the magic 8-ball a question!")
+    .addStringOption((option) =>
+      option
+        .setName("question")
+        .setDescription("Your question")
+        .setRequired(true)
+    ),
 ].map((command) => command.toJSON());
 
 // Add commands
@@ -76,6 +97,32 @@ const destroyResponses = [
   "Destruction begins now!",
 ];
 
+const insults = [
+  "You're a waste of space!",
+  "You're about as useful as a screen door on a submarine.",
+  "I'd agree with you but then we'd both be wrong.",
+  "You bring everyone so much joy... when you leave the room.",
+];
+
+const eightBallResponses = [
+  "Yes.",
+  "No.",
+  "Maybe.",
+  "Definitely.",
+  "Ask again later.",
+  "Without a doubt.",
+  "My sources say no.",
+  "Outlook not so good.",
+];
+
+// Helper function to mock text
+const mockText = (text) => {
+  return text
+    .split("")
+    .map((char, i) => (i % 2 === 0 ? char.toLowerCase() : char.toUpperCase()))
+    .join("");
+};
+
 // How it interacts
 client.on("interactionCreate", async (interaction) => {
   if (!interaction.isCommand()) return;
@@ -94,6 +141,22 @@ client.on("interactionCreate", async (interaction) => {
     const randomDestroy =
       destroyResponses[Math.floor(Math.random() * destroyResponses.length)];
     await interaction.reply(randomDestroy);
+  } else if (commandName === "mock") {
+    const lastMessage = interaction.channel.lastMessage;
+    if (lastMessage && lastMessage.content) {
+      const mocked = mockText(lastMessage.content);
+      await interaction.reply(mocked);
+    } else {
+      await interaction.reply("Couldn't find a message to mock!");
+    }
+  } else if (commandName === "insult") {
+    const target = interaction.options.getUser("target");
+    const randomInsult = insults[Math.floor(Math.random() * insults.length)];
+    await interaction.reply(`${target}, ${randomInsult}`);
+  } else if (commandName === "8ball") {
+    const randomResponse =
+      eightBallResponses[Math.floor(Math.random() * eightBallResponses.length)];
+    await interaction.reply(randomResponse);
   }
 });
 
