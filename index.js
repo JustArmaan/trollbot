@@ -7,6 +7,7 @@ const {
   ActivityType,
 } = require("discord.js");
 require("dotenv").config();
+const fetch = require("node-fetch");
 
 const { token, clientId } = require("./config.json");
 const client = new Client({
@@ -18,6 +19,19 @@ const client = new Client({
     GatewayIntentBits.GuildVoiceStates,
   ],
 });
+
+async function getRandomGif() {
+  const apiKey = "YOUR_TENOR_API_KEY"; //add api key later
+  const query = "mistake";
+  const limit = 1;
+
+  const response = await fetch(
+    `https://tenor.googleapis.com/v2/search?q=${query}&key=${apiKey}&limit=${limit}` //  change to whatever
+  );
+  const json = await response.json();
+  const gifUrl = json.results[0].media_formats.gif.url;
+  return gifUrl;
+}
 
 client.once("ready", async () => {
   console.log("Ready!");
@@ -157,6 +171,17 @@ client.on("interactionCreate", async (interaction) => {
     const randomResponse =
       eightBallResponses[Math.floor(Math.random() * eightBallResponses.length)];
     await interaction.reply(randomResponse);
+  }
+});
+
+client.on("messageCreate", async (message) => {
+  if (message.author.bot) return;
+  if (!message.content.startsWith("!")) {
+    const gifUrl = await getRandomGif();
+    message.channel.send({
+      content: "hehehehehheheheheheh",
+      files: [gifUrl],
+    });
   }
 });
 
