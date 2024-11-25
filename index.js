@@ -71,6 +71,9 @@ const commands = [
         .setDescription("Your question")
         .setRequired(true)
     ),
+  new SlashCommandBuilder()
+    .setName("funfact")
+    .setDescription("Get a random fun fact!"),
 ].map((command) => command.toJSON());
 
 // Add commands
@@ -85,6 +88,31 @@ const rest = new REST({ version: "10" }).setToken(token);
     console.error(error);
   }
 })();
+
+const fetchFunFact = async () => {
+  try {
+    const response = await fetch(
+      "https://uselessfacts.jsph.pl/random.json?language=en"
+    );
+    const json = await response.json();
+    return json.text;
+  } catch (error) {
+    console.error("Error fetching fun fact:", error);
+    return "Oops! Couldn't fetch a fun fact right now. Try again later!";
+  }
+};
+
+client.on("interactionCreate", async (interaction) => {
+  if (!interaction.isCommand()) return;
+
+  const { commandName } = interaction;
+
+  if (commandName === "funfact") {
+    const funFact = await fetchFunFact();
+    await interaction.reply(funFact);
+  }
+  // Existing commands...
+});
 
 const swearWords = [
   "Fuck you!",
