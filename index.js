@@ -1,15 +1,15 @@
-const {
+import fetch from "node-fetch";
+import dotenv from "dotenv";
+import {
   Client,
   GatewayIntentBits,
   REST,
   SlashCommandBuilder,
   Routes,
   ActivityType,
-} = require("discord.js");
-require("dotenv").config();
-const fetch = require("node-fetch");
+} from "discord.js";
+dotenv.config();
 
-const { token, clientId } = require("./config.json");
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
@@ -21,7 +21,7 @@ const client = new Client({
 });
 
 async function getRandomGif() {
-  const apiKey = "YOUR_TENOR_API_KEY"; //add api key later
+  const apiKey = process.env.TENOR_API_KEY;
   const query = "mistake";
   const limit = 1;
 
@@ -33,6 +33,30 @@ async function getRandomGif() {
   return gifUrl;
 }
 
+async function getCantSpell() {
+  const apiKey = process.env.TENOR_API_KEY;
+  const query = "Minor Spelling Mistake";
+  const limit = 1;
+
+  try {
+    const response = await fetch(
+      `https://tenor.googleapis.com/v2/search?q=${query}&key=${apiKey}&limit=${limit}`
+    );
+    const json = await response.json();
+
+    if (json.results && json.results.length > 0) {
+      return json.results[0].media_formats.gif.url;
+    } else {
+      throw new Error("No Mistake Found lier ");
+    }
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+}
+
+module.exports = getCantSpell;
+
 client.once("ready", async () => {
   console.log("Ready!");
   client.user.setActivity({
@@ -43,6 +67,9 @@ client.once("ready", async () => {
 
 // Define commands
 const commands = [
+  new SlashCommandBuilder()
+    .setName("badSpel")
+    .setDescription("Will meme the un spellers"),
   new SlashCommandBuilder()
     .setName("swear")
     .setDescription("Reply with a random swear word!"),
@@ -77,12 +104,14 @@ const commands = [
 ].map((command) => command.toJSON());
 
 // Add commands
-const rest = new REST({ version: "10" }).setToken(token);
+const rest = new REST({ version: "10" }).setToken(process.env.DISCORD_TOKEN);
 
 (async () => {
   try {
     console.log("Started refreshing application (/) commands.");
-    await rest.put(Routes.applicationCommands(clientId), { body: commands });
+    await rest.put(Routes.applicationCommands(process.env.CLIENT_ID), {
+      body: commands,
+    });
     console.log("Successfully reloaded application (/) commands.");
   } catch (error) {
     console.error(error);
@@ -111,7 +140,18 @@ client.on("interactionCreate", async (interaction) => {
     const funFact = await fetchFunFact();
     await interaction.reply(funFact);
   }
-  // Existing commands...
+
+  if (commandName === "badSpel") {
+    try {
+      const spellGif = await getCantSpell();
+      await interaction.reply({
+        content: "Minor Spelling Mistake",
+        files: [spellGif],
+      });
+    } catch (error) {
+      console.error(error);
+    }
+  }
 });
 
 const swearWords = [
@@ -213,4 +253,4 @@ client.on("messageCreate", async (message) => {
   }
 });
 
-client.login(token);
+client.login(process.env.DISCORD_TOKEN);

@@ -1,5 +1,5 @@
 {
-  "name": "meju_bot",
+  "name": "trollbot",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -22,5 +22,6 @@
     "mongodb": "^6.8.0",
     "node-fetch": "^3.3.2",
     "ytdl-core": "^4.11.5"
-  }
+  },
+  "type": "module"
 }
