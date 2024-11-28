@@ -8,6 +8,7 @@ import {
   Routes,
   ActivityType,
 } from "discord.js";
+
 dotenv.config();
 
 const client = new Client({
@@ -26,7 +27,7 @@ async function getRandomGif() {
   const limit = 1;
 
   const response = await fetch(
-    `https://tenor.googleapis.com/v2/search?q=${query}&key=${apiKey}&limit=${limit}` //  change to whatever
+    `https://tenor.googleapis.com/v2/search?q=${query}&key=${apiKey}&limit=${limit}`
   );
   const json = await response.json();
   const gifUrl = json.results[0].media_formats.gif.url;
@@ -55,7 +56,8 @@ async function getCantSpell() {
   }
 }
 
-module.exports = getCantSpell;
+// Replace module.exports with export default
+export default getCantSpell;
 
 client.once("ready", async () => {
   console.log("Ready!");
@@ -68,7 +70,7 @@ client.once("ready", async () => {
 // Define commands
 const commands = [
   new SlashCommandBuilder()
-    .setName("badSpel")
+    .setName("bad_spel")
     .setDescription("Will meme the un spellers"),
   new SlashCommandBuilder()
     .setName("swear")
