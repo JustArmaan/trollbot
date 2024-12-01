@@ -24,7 +24,7 @@ const client = new Client({
 async function getRandomGif() {
   const apiKey = process.env.TENOR_API_KEY;
   const query = "mistake";
-  const limit = 1;
+  const limit = 10;
 
   const response = await fetch(
     `https://tenor.googleapis.com/v2/search?q=${query}&key=${apiKey}&limit=${limit}`
@@ -37,7 +37,7 @@ async function getRandomGif() {
 async function getCantSpell() {
   const apiKey = process.env.TENOR_API_KEY;
   const query = "Minor Spelling Mistake";
-  const limit = 1;
+  const limit = 10;
 
   try {
     const response = await fetch(
