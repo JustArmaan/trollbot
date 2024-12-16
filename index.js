@@ -21,18 +21,18 @@ const client = new Client({
   ],
 });
 
-async function getRandomGif() {
-  const apiKey = process.env.TENOR_API_KEY;
-  const query = "mistake";
-  const limit = 10;
+// async function getRandomGif() {
+//   const apiKey = process.env.TENOR_API_KEY;
+//   const query = "mistake";
+//   const limit = 10;
 
-  const response = await fetch(
-    `https://tenor.googleapis.com/v2/search?q=${query}&key=${apiKey}&limit=${limit}`
-  );
-  const json = await response.json();
-  const gifUrl = json.results[0].media_formats.gif.url;
-  return gifUrl;
-}
+//   const response = await fetch(
+//     `https://tenor.googleapis.com/v2/search?q=${query}&key=${apiKey}&limit=${limit}`
+//   );
+//   const json = await response.json();
+//   const gifUrl = json.results[0].media_formats.gif.url;
+//   return gifUrl;
+// }
 
 async function getCantSpell() {
   const apiKey = process.env.TENOR_API_KEY;
@@ -46,9 +46,10 @@ async function getCantSpell() {
     const json = await response.json();
 
     if (json.results && json.results.length > 0) {
-      return json.results[0].media_formats.gif.url;
+      const randomIndex = Math.floor(Math.random() * json.results.length);
+      return json.results[randomIndex].media_formats.gif.url;
     } else {
-      throw new Error("No Mistake Found lier ");
+      throw new Error("No Mistake Found liar");
     }
   } catch (error) {
     console.error(error);
@@ -143,7 +144,7 @@ client.on("interactionCreate", async (interaction) => {
     await interaction.reply(funFact);
   }
 
-  if (commandName === "badSpel") {
+  if (commandName === "bad_Spel") {
     try {
       const spellGif = await getCantSpell();
       await interaction.reply({
