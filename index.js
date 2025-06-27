@@ -1,13 +1,13 @@
-import fetch from "node-fetch";
-import dotenv from "dotenv";
 import {
+  ActivityType,
   Client,
   GatewayIntentBits,
   REST,
-  SlashCommandBuilder,
   Routes,
-  ActivityType,
+  SlashCommandBuilder,
 } from "discord.js";
+import dotenv from "dotenv";
+import fetch from "node-fetch";
 
 dotenv.config();
 
@@ -187,7 +187,19 @@ const insults = [
   "You're about as useful as a screen door on a submarine.",
   "I'd agree with you but then we'd both be wrong.",
   "You bring everyone so much joy... when you leave the room.",
+  "You're the reason the gene pool needs a lifeguard.",
+  "If I had a dollar for every smart thing you said, I'd be broke.",
+  "You're like a cloud—when you disappear, it's a beautiful day.",
+  "You're proof that even evolution takes a break sometimes.",
+  "You're not stupid; you just have bad luck thinking.",
+  "You're like a software bug in human form.",
+  "You're the human equivalent of a typo.",
+  "You have something on your chin... no, the third one down.",
+  "Your secrets are always safe with me. I never even listen when you tell me them.",
+  "You're as sharp as a marble.",
+  "You have something on your face… oh never mind, it’s just your face.",
 ];
+
 
 const eightBallResponses = [
   "Yes.",
@@ -239,9 +251,10 @@ client.on("interactionCreate", async (interaction) => {
     const randomInsult = insults[Math.floor(Math.random() * insults.length)];
     await interaction.reply(`${target}, ${randomInsult}`);
   } else if (commandName === "8ball") {
+    const question = interaction.options.getString("question");
     const randomResponse =
       eightBallResponses[Math.floor(Math.random() * eightBallResponses.length)];
-    await interaction.reply(randomResponse);
+    await interaction.reply(`Question: "${question}"\nAnswer: ${randomResponse}`);
   }
 });
 
