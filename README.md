@@ -49,6 +49,7 @@ Here are a few fun things you can do with TrollBot:
 /insult: Roast someone with a humorous jab.
 /askmagicball [question]: Let the magic ball deliver its sarcastic wisdom.
 /troll [@user]: Pull a fun prank on a friend.
+/brainrot: Gives a random word or brainrot phrase.(gotta fix this)
 (Note: Replace these examples with actual commands if they differ.)
 
 ⚠️ Known Issues
