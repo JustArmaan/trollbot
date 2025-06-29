@@ -1,14 +1,13 @@
-import fetch from 'node-fetch';
-import dotenv from 'dotenv';
 import {
+  ActivityType,
   Client,
   GatewayIntentBits,
   REST,
-  SlashCommandBuilder,
   Routes,
-  ActivityType,
-  Events,
+  SlashCommandBuilder
 } from 'discord.js';
+import dotenv from 'dotenv';
+import fetch from 'node-fetch';
 import Typo from 'typo-js';
 
 dotenv.config();
@@ -46,7 +45,7 @@ async function getCantSpell() {
 
   try {
     const response = await fetch(
-      `https://tenor.googleapis.com/v2/search?q=${query}&key=${apiKey}&limit=${limit}`
+      `https://tenor.googleapis.com/v2/search?q=${encodeURIComponent(query)}&key=${apiKey}&limit=${limit}`
     );
     const json = await response.json();
 
@@ -62,9 +61,14 @@ async function getCantSpell() {
   }
 }
 
-function isSpelledCorrectly(message) {
-  const words = message.split(' ');
-  return words.some((word) => dictionary.check(word));
+function isSpelledCorrectly (message) {
+  const words = message.toLowerCase().split(' ');
+  for (const word of words) {
+    if (word.length > 2 && !dictionary.check(word)) {
+      return true;
+    }
+  }
+  return false;
 }
 
 console.log(isSpelledCorrectly('Tewt messae'));
@@ -266,20 +270,25 @@ client.on('messageCreate', async (message) => {
   console.log(message);
   if (message.author.bot) return;
 
-  if (!isSpelledCorrectly(message)) {
+  if (!message.guild) return;
+
+  if (message.content.startsWith('/') || message.content.startsWith('!')) return;
+
+if (isSpelledCorrectly(message.content)) {
     const gifUrl = await getCantSpell();
-    message.channel.send({
-      files: [gifUrl],
-    });
+    message.reply({
+        content: 'Minor Spelling Mistake',
+        files: [gifUrl],
+      });
   }
 
-  if (!message.content.startsWith('!')) {
-    const gifUrl = await getRandomGif();
-    message.channel.send({
-      content: 'hehehehehheheheheheh',
-      files: [gifUrl],
-    });
-  }
+  // if (!message.content.startsWith('!')) {
+  //   const gifUrl = await getRandomGif();
+  //   message.channel.send({
+  //     content: 'hehehehehheheheheheh',
+  //     files: [gifUrl],
+  //   });
+  // }
 });
 
 client.login(process.env.DISCORD_TOKEN);
