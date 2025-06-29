@@ -62,13 +62,45 @@ async function getCantSpell() {
 }
 
 function isSpelledCorrectly (message) {
-  const words = message.toLowerCase().split(' ');
+  if (message.length < 8) return false;
+
+  const alphaCount = (message.match(/[a-zA-Z]/g) || []).length;
+  if (alphaCount < 4) return false;
+
+  if (message.includes('<:') || message.includes('<@') || message.includes('<#')) return false;
+
+  const upperCount = (message.match(/[A-Z]/g) || []).length;
+  if (upperCount > alphaCount * 0.7) return false;
+
+  const words = message.toLowerCase().split(/\s+/).filter(word => word.length > 0);
+
+  if (words.length < 2) return false;
+
+  let misspelledCount = 0;
+  let totalValidWords = 0;
+
   for (const word of words) {
-    if (word.length > 2 && !dictionary.check(word)) {
-      return true;
+    const cleanWord = word.replace(/[^\w]/g, '');
+
+    if (cleanWord.length <= 2 || /^\d+$/.test(cleanWord)) continue;
+
+    const commonSlang = ['lol', 'lmao', 'omg', 'wtf', 'brb', 'tbh', 'imo', 'ngl', 'fr', 'rn', 'gg', 'ez', 'pog', 'sus'];
+    if (commonSlang.includes(cleanWord.toLowerCase())) continue;
+
+    if (/^(.)\1{2,}$/.test(cleanWord)) continue;
+
+    totalValidWords++;
+
+    if (!dictionary.check(cleanWord)) {
+      misspelledCount++;
+      console.log(`Misspelled word found: ${cleanWord}`);
     }
   }
-  return false;
+
+  const shouldTrigger = totalValidWords >= 2 && misspelledCount >= 1 &&
+    (misspelledCount >= 2 || (misspelledCount / totalValidWords) >= 0.5);
+
+  return shouldTrigger;
 }
 
 console.log(isSpelledCorrectly('Tewt messae'));
