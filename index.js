@@ -277,7 +277,6 @@ client.on('messageCreate', async (message) => {
 if (isSpelledCorrectly(message.content)) {
     const gifUrl = await getCantSpell();
     message.reply({
-        content: 'Minor Spelling Mistake',
         files: [gifUrl],
       });
   }
