@@ -212,6 +212,11 @@ const eightBallResponses = [
   "Outlook not so good.",
 ];
 
+const armaanCompliments = [
+
+  "Error: Cannot compute insult for Armaan - too awesome! 🤖",
+];
+
 // Helper function to mock text
 const mockText = (text) => {
   return text
@@ -248,8 +253,12 @@ client.on("interactionCreate", async (interaction) => {
     }
   } else if (commandName === "insult") {
     const target = interaction.options.getUser("target");
-    const randomInsult = insults[Math.floor(Math.random() * insults.length)];
-    await interaction.reply(`${target}, ${randomInsult}`);
+     if (target.username === "armaan2004") {
+      await interaction.reply(  "Error: Cannot compute insult for Armaan - too awesome! 🤖");
+    } else {
+      const randomInsult = insults[Math.floor(Math.random() * insults.length)];
+      await interaction.reply(`${target}, ${randomInsult}`);
+    }
   } else if (commandName === "8ball") {
     const question = interaction.options.getString("question");
     const randomResponse =
