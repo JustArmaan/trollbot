@@ -8,9 +8,13 @@ import {
 } from "discord.js";
 import dotenv from "dotenv";
 import fetch from "node-fetch";
+import Typo from "typo-js";
 
 dotenv.config();
 
+const dictionary = new Typo("en_US", false, false, {
+  dictionaryPath: "./dictionaries/",
+});
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
@@ -41,7 +45,9 @@ async function getCantSpell() {
 
   try {
     const response = await fetch(
-      `https://tenor.googleapis.com/v2/search?q=${query}&key=${apiKey}&limit=${limit}`
+      `https://tenor.googleapis.com/v2/search?q=${encodeURIComponent(
+        query
+      )}&key=${apiKey}&limit=${limit}`
     );
     const json = await response.json();
 
@@ -56,6 +62,75 @@ async function getCantSpell() {
     throw error;
   }
 }
+
+function isSpelledCorrectly(message) {
+  if (message.length < 8) return false;
+
+  const alphaCount = (message.match(/[a-zA-Z]/g) || []).length;
+  if (alphaCount < 4) return false;
+
+  if (
+    message.includes("<:") ||
+    message.includes("<@") ||
+    message.includes("<#")
+  )
+    return false;
+
+  const upperCount = (message.match(/[A-Z]/g) || []).length;
+  if (upperCount > alphaCount * 0.7) return false;
+
+  const words = message
+    .toLowerCase()
+    .split(/\s+/)
+    .filter((word) => word.length > 0);
+
+  if (words.length < 2) return false;
+
+  let misspelledCount = 0;
+  let totalValidWords = 0;
+
+  for (const word of words) {
+    const cleanWord = word.replace(/[^\w]/g, "");
+
+    if (cleanWord.length <= 2 || /^\d+$/.test(cleanWord)) continue;
+
+    const commonSlang = [
+      "lol",
+      "lmao",
+      "omg",
+      "wtf",
+      "brb",
+      "tbh",
+      "imo",
+      "ngl",
+      "fr",
+      "rn",
+      "gg",
+      "ez",
+      "pog",
+      "sus",
+    ];
+    if (commonSlang.includes(cleanWord.toLowerCase())) continue;
+
+    if (/^(.)\1{2,}$/.test(cleanWord)) continue;
+
+    totalValidWords++;
+
+    if (!dictionary.check(cleanWord)) {
+      misspelledCount++;
+      console.log(`Misspelled word found: ${cleanWord}`);
+    }
+  }
+
+  const shouldTrigger =
+    totalValidWords >= 2 &&
+    misspelledCount >= 1 &&
+    (misspelledCount >= 2 || misspelledCount / totalValidWords >= 0.5);
+
+  return shouldTrigger;
+}
+
+console.log(isSpelledCorrectly("Tewt messae"));
 
 // Replace module.exports with export default
 export default getCantSpell;
@@ -200,7 +275,6 @@ const insults = [
   "You have something on your face… oh never mind, it’s just your face.",
 ];
 
-
 const eightBallResponses = [
   "Yes.",
   "No.",
@@ -213,7 +287,6 @@ const eightBallResponses = [
 ];
 
 const armaanCompliments = [
-
   "Error: Cannot compute insult for Armaan - too awesome! 🤖",
 ];
 
@@ -227,6 +300,7 @@ const mockText = (text) => {
 
 // How it interacts
 client.on("interactionCreate", async (interaction) => {
+  console.log(interaction);
   if (!interaction.isCommand()) return;
 
   const { commandName } = interaction;
@@ -253,8 +327,10 @@ client.on("interactionCreate", async (interaction) => {
     }
   } else if (commandName === "insult") {
     const target = interaction.options.getUser("target");
-     if (target.username === "armaan2004") {
-      await interaction.reply(  "Error: Cannot compute insult for Armaan - too awesome! 🤖");
+    if (target.username === "armaan2004") {
+      await interaction.reply(
+        "Error: Cannot compute insult for Armaan - too awesome! 🤖"
+      );
     } else {
       const randomInsult = insults[Math.floor(Math.random() * insults.length)];
       await interaction.reply(`${target}, ${randomInsult}`);
@@ -263,19 +339,39 @@ client.on("interactionCreate", async (interaction) => {
     const question = interaction.options.getString("question");
     const randomResponse =
       eightBallResponses[Math.floor(Math.random() * eightBallResponses.length)];
-    await interaction.reply(`Question: "${question}"\nAnswer: ${randomResponse}`);
+    await interaction.reply(
+      `Question: "${question}"\nAnswer: ${randomResponse}`
+    );
   }
 });
 
+// client.on(Events.MessageCreate, (msg) => {
+//   console.log('Message Recieved');
+// });
+
 client.on("messageCreate", async (message) => {
+  console.log(message);
   if (message.author.bot) return;
-  if (!message.content.startsWith("!")) {
-    const gifUrl = await getRandomGif();
-    message.channel.send({
-      content: "hehehehehheheheheheh",
+
+  if (!message.guild) return;
+
+  if (message.content.startsWith("/") || message.content.startsWith("!"))
+    return;
+
+  if (isSpelledCorrectly(message.content)) {
+    const gifUrl = await getCantSpell();
+    message.reply({
       files: [gifUrl],
     });
   }
+
+  // if (!message.content.startsWith('!')) {
+  //   const gifUrl = await getRandomGif();
+  //   message.channel.send({
+  //     content: 'hehehehehheheheheheh',
+  //     files: [gifUrl],
+  //   });
+  // }
 });
 
 client.login(process.env.DISCORD_TOKEN);
