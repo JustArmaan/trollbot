@@ -384,4 +384,29 @@ new SlashCommandBuilder()
       .setRequired(true)
   ),
 
+  async function getRatioGif() {
+  const apiKey = process.env.TENOR_API_KEY;
+  const query = "ratio'd";
+  const limit = 10;
+
+  try {
+    const response = await fetch(
+      `https://tenor.googleapis.com/v2/search?q=${encodeURIComponent(
+        query
+      )}&key=${apiKey}&limit=${limit}`
+    );
+    const json = await response.json();
+
+    if (json.results && json.results.length > 0) {
+      const randomIndex = Math.floor(Math.random() * json.results.length);
+      return json.results[randomIndex].media_formats.gif.url;
+    } else {
+      throw new Error("No ratio GIF found");
+    }
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+}
+
 client.login(process.env.DISCORD_TOKEN);
