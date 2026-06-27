@@ -374,4 +374,14 @@ client.on("messageCreate", async (message) => {
   // }
 });
 
+new SlashCommandBuilder()
+  .setName("ratio")
+  .setDescription("Call out a dry, one-word reply!")
+  .addUserOption((option) =>
+    option
+      .setName("target")
+      .setDescription("The user to ratio")
+      .setRequired(true)
+  ),
+
 client.login(process.env.DISCORD_TOKEN);
