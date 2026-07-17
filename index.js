@@ -34,8 +34,8 @@ const VOICE_OPTIONS = {
     'en-gb': 'English (UK)',
     'en-au': 'English (Australia)',
     'en-in': 'English (India)',
-    'fr': 'French',
-    'es': 'Spanish',
+    fr: 'French',
+    es: 'Spanish',
 };
 
 const guildVoices = new Map();
@@ -177,6 +177,24 @@ const commands = [
         .setDescription('Join your voice channel and say your message out loud')
         .addStringOption((option) =>
             option.setName('message').setDescription('What the bot should say').setRequired(true)
+        )
+        .addStringOption((option) =>
+            option
+                .setName('voice')
+                .setDescription('Accent to speak in (defaults to server setting)')
+                .setRequired(false)
+                .addChoices(...Object.entries(VOICE_OPTIONS).map(([value, name]) => ({ name, value })))
+        ),
+
+    new SlashCommandBuilder()
+        .setName('setvoice')
+        .setDescription("Set this server's default TTS accent")
+        .addStringOption((option) =>
+            option
+                .setName('voice')
+                .setDescription('Accent to use')
+                .setRequired(true)
+                .addChoices(...Object.entries(VOICE_OPTIONS).map(([value, name]) => ({ name, value })))
         ),
     new SlashCommandBuilder().setName('leave').setDescription('Disconnect the bot from the voice channel'),
     new SlashCommandBuilder()
