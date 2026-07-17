@@ -300,7 +300,7 @@ async function speakInChannel(interaction, text) {
     try {
         for (const chunk of chunks) {
             const url = googleTTS.getAudioUrl(chunk, {
-                lang: 'en',
+                lang,
                 slow: false,
                 host: 'https://translate.google.com',
             });
