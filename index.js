@@ -9,6 +9,16 @@ import {
 import dotenv from "dotenv";
 import fetch from "node-fetch";
 import Typo from "typo-js";
+import {
+  joinVoiceChannel,
+  createAudioPlayer,
+  createAudioResource,
+  entersState,
+  VoiceConnectionStatus,
+  AudioPlayerStatus,
+  getVoiceConnection,
+} from "@discordjs/voice";
+import googleTTS from "google-tts-api";
 
 dotenv.config();
 
@@ -179,6 +189,18 @@ const commands = [
   new SlashCommandBuilder()
     .setName("funfact")
     .setDescription("Get a random fun fact!"),
+  new SlashCommandBuilder()
+    .setName("tts")
+    .setDescription("Join your voice channel and say your message out loud")
+    .addStringOption((option) =>
+      option
+        .setName("message")
+        .setDescription("What the bot should say")
+        .setRequired(true)
+    ),
+  new SlashCommandBuilder()
+    .setName("leave")
+    .setDescription("Disconnect the bot from the voice channel"),
 ].map((command) => command.toJSON());
 
 // Add commands
