@@ -343,6 +343,30 @@ client.on("interactionCreate", async (interaction) => {
       console.error(error);
     }
   }
+
+  if (commandName === "tts") {
+    const message = interaction.options.getString("message");
+    try {
+      await speakInChannel(interaction, message);
+    } catch (error) {
+      console.error("Error handling /tts:", error);
+      if (interaction.deferred || interaction.replied) {
+        await interaction.editReply("Something went wrong with /tts.");
+      } else {
+        await interaction.reply("Something went wrong with /tts.");
+      }
+    }
+  }
+
+  if (commandName === "leave") {
+    const connection = getVoiceConnection(interaction.guildId);
+    if (connection) {
+      connection.destroy();
+      await interaction.reply("👋 Left the voice channel.");
+    } else {
+      await interaction.reply("I'm not in a voice channel.");
+    }
+  }
 });
 
 const swearWords = [
