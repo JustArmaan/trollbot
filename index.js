@@ -262,7 +262,7 @@ function splitForTTS(text, maxLen = 200) {
     return chunks;
 }
 
-async function speakInChannel(interaction, text) {
+async function speakInChannel(interaction, text, lang = 'en-us') {
     const member = interaction.member;
     const voiceChannel = member?.voice?.channel;
 
@@ -406,8 +406,10 @@ client.on('interactionCreate', async (interaction) => {
 
             case 'tts': {
                 const message = interaction.options.getString('message');
+                const voiceOption = interaction.options.getString('voice');
+                const lang = voiceOption || guildVoices.get(interaction.guildId) || 'en-us';
                 try {
-                    await speakInChannel(interaction, message);
+                    await speakInChannel(interaction, message, lang);
                 } catch (error) {
                     console.error('Error handling /tts:', error);
                     if (interaction.deferred || interaction.replied) {
@@ -427,6 +429,13 @@ client.on('interactionCreate', async (interaction) => {
                 } else {
                     await interaction.reply("I'm not in a voice channel.");
                 }
+                break;
+            }
+
+            case 'setvoice': {
+                const voice = interaction.options.getString('voice');
+                guildVoices.set(interaction.guildId, voice);
+                await interaction.reply(`✅ Default TTS voice set to **${VOICE_OPTIONS[voice]}**.`);
                 break;
             }
 
