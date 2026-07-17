@@ -262,6 +262,66 @@ function splitForTTS(text, maxLen = 200) {
   return chunks;
 }
 
+async function speakInChannel(interaction, text) {
+  const member = interaction.member;
+  const voiceChannel = member?.voice?.channel;
+
+  if (!voiceChannel) {
+    await interaction.reply({
+      content: "You need to be in a voice channel first!",
+      ephemeral: true,
+    });
+    return;
+  }
+
+  await interaction.deferReply();
+
+  const connection = joinVoiceChannel({
+    channelId: voiceChannel.id,
+    guildId: voiceChannel.guild.id,
+    adapterCreator: voiceChannel.guild.voiceAdapterCreator,
+    selfDeaf: true,
+  });
+
+  try {
+    await entersState(connection, VoiceConnectionStatus.Ready, 10_000);
+  } catch (error) {
+    console.error("Failed to join voice channel:", error);
+    connection.destroy();
+    await interaction.editReply("Couldn't connect to the voice channel.");
+    return;
+  }
+
+  const player = getPlayerForGuild(voiceChannel.guild.id);
+  connection.subscribe(player);
+
+  const chunks = splitForTTS(text);
+
+  try {
+    for (const chunk of chunks) {
+      const url = googleTTS.getAudioUrl(chunk, {
+        lang: "en",
+        slow: false,
+        host: "https://translate.google.com",
+      });
+
+      const resource = createAudioResource(url);
+      player.play(resource);
+
+      // dont remove, breaks EVERYTHING!!!
+      await entersState(player, AudioPlayerStatus.Playing, 10_000);
+      await new Promise((resolve) => {
+        player.once(AudioPlayerStatus.Idle, resolve);
+      });
+    }
+
+    await interaction.editReply(`🔊 Said: "${text}"`);
+  } catch (error) {
+    console.error("Error playing TTS audio:", error);
+    await interaction.editReply("Something went wrong while speaking that.");
+  }
+}
+
 client.on("interactionCreate", async (interaction) => {
   if (!interaction.isCommand()) return;
 
