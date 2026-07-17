@@ -29,6 +29,17 @@ const client = new Client({
     ],
 });
 
+const VOICE_OPTIONS = {
+    'en-us': 'English (US)',
+    'en-gb': 'English (UK)',
+    'en-au': 'English (Australia)',
+    'en-in': 'English (India)',
+    'fr': 'French',
+    'es': 'Spanish',
+};
+
+const guildVoices = new Map();
+
 const commonSlang = ['lol', 'lmao', 'omg', 'wtf', 'brb', 'tbh', 'imo', 'ngl', 'fr', 'rn', 'gg', 'ez', 'pog', 'sus'];
 
 // --- Giphy fetchers ---
