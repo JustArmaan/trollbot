@@ -231,6 +231,37 @@ const fetchFunFact = async () => {
   }
 };
 
+// Keep one audio player per guild so /tts calls in the same server queue nicely
+const audioPlayers = new Map();
+
+function getPlayerForGuild(guildId) {
+  if (!audioPlayers.has(guildId)) {
+    audioPlayers.set(guildId, createAudioPlayer());
+  }
+  return audioPlayers.get(guildId);
+}
+
+// Google Translate's TTS endpoint caps requests at ~200 characters,
+// so split long messages into chunks and queue them as separate resources.
+function splitForTTS(text, maxLen = 200) {
+  const words = text.split(/\s+/);
+  const chunks = [];
+  let current = "";
+
+  for (const word of words) {
+    const candidate = current ? `${current} ${word}` : word;
+    if (candidate.length > maxLen) {
+      if (current) chunks.push(current);
+      current = word;
+    } else {
+      current = candidate;
+    }
+  }
+  if (current) chunks.push(current);
+
+  return chunks;
+}
+
 client.on("interactionCreate", async (interaction) => {
   if (!interaction.isCommand()) return;
 
